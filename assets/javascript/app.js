@@ -75,7 +75,65 @@ var triviaGame = {
 
     stopTimer: function(){
         clearInterval(1);
+    },
+
+    evaluateResult: function(){
+
     }
 }
 
-triviaGame.startGame();
+// triviaGame.startGame();
+
+$(function () {
+    $('[data-toggle="tooltip"]').tooltip()
+})
+
+$("#start-button").click(function(){
+    $(".d-none").removeClass("d-none");
+})
+
+$(".choice").click(function(){
+    $(".choice").removeClass("active")
+    $(this).addClass("active");
+})
+
+$("#submit").click(function(){
+
+
+    $("#resultModal").modal('show');
+
+    setTimeout(function(){
+        $("#testing").text("Testing");
+    }, 2000)
+
+    setTimeout(function(){
+        $("#resultModal").modal('hide');
+    }, 4000)
+})
+
+// Listens for the modal to be closed to start the next question.
+$("#resultModal").on('hidden.bs.modal', function(){
+    console.log("This shit is working");
+})
+
+
+function shuffle(array) {
+    // Shuffles an array using the Fisher-Yates Algorithm.
+    // Source Code: https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+    var currentIndex = array.length, temporaryValue, randomIndex;
+  
+    // While there remain elements to shuffle.
+    while (0 !== currentIndex) {
+  
+      // Pick a remaining element.
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex -= 1;
+  
+      // And swap it with the current element.
+      temporaryValue = array[currentIndex];
+      array[currentIndex] = array[randomIndex];
+      array[randomIndex] = temporaryValue;
+    }
+  
+    return array;
+  }
