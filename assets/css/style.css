@@ -1,0 +1,25 @@
+@font-face {
+    font-family: 'pixar';
+    src: url(../fonts/CharlemagneStd-Bold.otf);
+}
+
+body {
+    background-image: url(../images/pixar-background.jpg);
+    background-size: 100%;
+    background-repeat: no-repeat;
+    background-position: bottom center;
+    background-attachment: fixed;
+    font-family: 'pixar';
+}
+
+#trivia-header{
+    font-size: 16pt; 
+    margin-right: 20px
+}
+
+@media screen and (max-width:767px){
+    #trivia-header{
+        font-size: 10pt;
+        margin-right: 10px;
+    }
+}
