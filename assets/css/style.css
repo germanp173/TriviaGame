@@ -17,6 +17,15 @@ body {
     margin-right: 20px
 }
 
+#timeLeft {
+    width: 75px;
+    margin-bottom: 10px;
+}
+
+#nextQuestionTimeLeft{
+    width: 50px;
+}
+
 @media screen and (max-width:767px){
     #trivia-header{
         font-size: 10pt;

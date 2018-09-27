@@ -27,8 +27,19 @@ var questions = {
             "1988",
             "2005"
         ]
+    },
+    3: {
+        question: "How many Toy Story Movies have been released?",
+        answer: "3",
+        wrongAnswers: [
+            "1",
+            "5",
+            "4"
+        ]
     }
 }
+
+var intervals = [];
 
 var triviaGame = {
     questionNum: 0,
@@ -36,7 +47,7 @@ var triviaGame = {
     questionTimeLeft: 0,
     nextQuestionTimeout: 10, // In seconds
     nextQuestionTimeLeft: 0,
-    timerHtml = "<h1><span class=\"badge badge-success\" id=\"timeLeft\">30</span></h1><h3 id=\"question\"></h3>",
+    timerHtml: "<h1><span class=\"badge badge-success\" data-state=\"success\" id=\"timeLeft\">30</span></h1><h3 id=\"question\"></h3>",
 
     startGame: function () {
         this.questionNum = 0;
@@ -50,6 +61,7 @@ var triviaGame = {
         // Ensure that there is still questions left. If not, end the game.
         if (this.questionNum > Object.keys(questions).length) {
             this.endGame();
+            return;
         }
 
         // Reset time left for the question and result modal.
@@ -57,117 +69,137 @@ var triviaGame = {
         this.nextQuestionTimeLeft = this.nextQuestionTimeout;
 
         // Gets the next question and sets the UI.
-        this.setQuestionUI(this.questionNum);
+        this.updateUI(this.questionNum);
 
         // Start question timer.
-        this.questionTimer();
+        this.startQuestionTimer();
     },
 
-    setQuestionUI: function (num) {
-        var questionObj = questions[num];
-
-        // Update timers.
+    updateUI: function (num) {
+        // Update timers and pill.
         $("#timeLeft").text(this.questionTimeLeft);
-        $("#next-question-timer-left").text(this.nextQuestionTimeLeft);
+        $("#nextQuestionTimeLeft").text(this.nextQuestionTimeLeft);
+        this.updateTimerPill("success");
 
         // Update question in UI.
+        var questionObj = questions[num];
         $("#question").text(questionObj.question);
 
         // Create an array of all possible answers (both right and wrong answers).
         var possibleChoices = questionObj.wrongAnswers;
         possibleChoices.push(questionObj.answer);
 
-        // Shuffle these choices.
+        // Shuffle these options.
         possibleChoices = shuffle(possibleChoices);
 
-        // Set possible choices in UI.
+        // Set possible choices in UI and ensure none of them are selected.
         $(".choice").each(function (i, listItem) {
             $(listItem).text(possibleChoices[i]);
         })
+        $(".active").removeClass("active");
+
+        // Update progress bar and tooltip.
+        var numComplete = num-1;
+        var totalNumOfQuestion = Object.keys(questions).length;
+        var percentComplete = Math.round((numComplete/totalNumOfQuestion)*100);
+        $("#progress").attr("style", "width: " + percentComplete + "%").attr("data-original-title", numComplete + "/" + totalNumOfQuestion);
     },
 
-    questionTimer: function () {
+    startQuestionTimer: function () {
+        // Create Timer Interval. Interval is declared as a varible to be able to easially clear it when the timer is done.
         var questionTimer = setInterval(function () {
+
+            // Update time left and UI.
             triviaGame.questionTimeLeft--;
             $("#timeLeft").text(triviaGame.questionTimeLeft);
 
-            if (triviaGame.questionTimeleft === 20) {
-                this.updateTimerPill("warning");
-            } else if (triviaGame.questionTimeLeft === 10) {
-                this.updateTimerPill("danger");
-            } else if (triviaGame.questionTimeLeft === 0) {
+            // Update pill as needed or end the question.            
+            if (triviaGame.questionTimeLeft === 20) {
+                triviaGame.updateTimerPill("warning");
+            }
+            else if (triviaGame.questionTimeLeft === 10) {
+                triviaGame.updateTimerPill("danger");
+            } 
+            else if (triviaGame.questionTimeLeft === 0) {
                 clearInterval(questionTimer);
-                this.evaluateResult();
+                triviaGame.evaluateResult();
             }
         }, 1000);
+
+        // Push timer to invervals array so it can be stopped on demand.
+        intervals.push(questionTimer);
     },
 
-    nextQuestionTimer: function () {
-        setTimeout(function () {
-            console.log("Moving on to the next question!");
-            triviaGame.nextQuestion();
-        }, triviaGame.nextQuestionTimeout)
-    },
-
-    stopTimer: function () {
-        clearInterval(1);
+    stopIntervals: function () {
+        // Clears all intervals that were stored in the Intervals array.
+        for (var i=0; i < intervals.length; i++){
+            clearInterval(intervals[i]);
+            intervals.splice(i, 1);
+        }
     },
 
     evaluateResult: function () {
-        this.stopTimer();
+        // Make sure all intervals are stopped in case the user has submitted their answer before the time ran out.
+        this.stopIntervals();
 
         // Set variables needed to evaluate and update the trivia game.        
         var modalTitle = $("#modalCenterTitle");
         var modalBody = $(".modal-body");
-        var modalFooter = $("#nextQuestionTimeLeft");
         var userChoice = $(".active").text();
-
+        
         // Evaluate the game.
         if (userChoice === questions[this.questionNum].answer) {
             modalTitle.text("Correct!");
             modalBody.text("Add some awesome celebration here");
         } else {
-            modalTitle.text("Wrong!");
+            userChoice === "" ? modalTitle.text("Time ran out!") : modalTitle.text("Wrong!");
             modalBody.text("The correct answer is: " + questions[this.questionNum].answer);
         }
-
-        startNextQuestionInterval();
+        
+        // Show results.
+        $("#resultModal").modal('show');
 
         var startNextQuestionInterval = function () {
-            var interval = setInterval(function () {
-
+            // Set timer that will automatically start next question.
+            var nextQuestionTimer = setInterval(function () {
+                
                 triviaGame.nextQuestionTimeLeft--;
                 $("#nextQuestionTimeLeft").text(triviaGame.nextQuestionTimeLeft);
-
                 if (triviaGame.nextQuestionTimeLeft === 0) {
-                    clearInterval(interval);
+                    // Clears the interval. If, however, the modal is closed before the 
+                    // interval reaches 0 then the interval will be cleared by the modal on close event.
+                    clearInterval(nextQuestionTimer);
                     $("#resultModal").modal('hide');
                 }
             }, 1000);
+
+            // Push timer to invervals array so it can be stopped on demand.
+            intervals.push(nextQuestionTimer);
         }
+
+        startNextQuestionInterval();
     },
 
     endGame: function () {
         
     },
 
-    pillClassSuffix: "success",
-
-    updateTimerPill: function (classSuffix) {
+    updateTimerPill: function(state) {
         var pill = $("#timeLeft");
-        pill.removeClass("badge-" + this.pillClassSuffix);
-        pill.addClass("badge-" + classSuffix);
-        this.pillClassSuffix = classSuffix;
+        pill.removeClass("badge-" + pill.attr("data-state"));
+        pill.addClass("badge-" + state);
+        pill.attr("data-state", state);
     }
 }
 
 // Activate Bootstrap Tooltips
 $(function () {
-    $('[data-toggle="tooltip"]').tooltip()
+    $('[data-toggle="tooltip"]').tooltip();
 })
 
 // Start Button listener
 $("#start-button").click(function () {
+
     // Update top display HTML.
     $("#top-display").html(triviaGame.timerHtml);
 
@@ -191,9 +223,13 @@ $("#submit").click(function () {
 
 // Listens for the modal to be closed to start the next question.
 $("#resultModal").on('hidden.bs.modal', function () {
-    console.log("This shit is working");
-})
+    // Ensure that all intervals have been cleared incase the user close the modal 
+    // before the next question time was up.
+    triviaGame.stopIntervals();
 
+    // Start playing the next question!
+    triviaGame.nextQuestion();
+})
 
 function shuffle(array) {
     // Shuffles an array using the Fisher-Yates Algorithm.
