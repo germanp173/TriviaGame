@@ -1,14 +1,3 @@
-// Initial notes:
-// 1. Need an object that holds each question
-//      - Question
-//      - String Right answer
-//      - Array of wrong answers?
-// 2. Will need a timer for each question
-// 3. Need a counter that keeps track of question progress
-// 4. Function that calls a set timeout function which contains the functionality that automatically starts the next question 
-// 5. Button to restart the game after it's over
-// 6. Only one answer for each question can be chosen
-
 var questions = {
     1: {
         question: "What year was Pixar started?",
@@ -47,10 +36,22 @@ var triviaGame = {
     questionTimeLeft: 0,
     nextQuestionTimeout: 10, // In seconds
     nextQuestionTimeLeft: 0,
-    timerHtml: "<h1><span class=\"badge badge-success\" data-state=\"success\" id=\"timeLeft\">30</span></h1><h3 id=\"question\"></h3>",
-
+    numCorrect: 0,
+    numWrong: 0,
+    timerHtml: "<div class='row'><div class='col-sm-4'><h1><span class='badge badge-primary' id='correct'>0</span></h1></div>" + 
+                "<div class='col-sm-4'><h1><span class='badge badge-success' data-state='success' id='timeLeft'>30</span></h1></div>" +
+                "<div class='col-sm-4'><h1><span class='badge badge-danger' id='wrong'>0</span></h1></div></div><h3 id='question'></h3>",
+    gameOverHtml: "<br><div class='card mb-3 text-white bg-dark' style='margin: auto; max-width: 25rem;'><div class='card-header'>All Done</div>" +
+                    "<div class='card-body'><h5 class='card-title'>So, how did you do?</h5><br><div class='row'><div class='col-sm-6'>" +
+                    "<h1><span class='badge badge-primary' id='correct'>0</span></h1></div><div class='col-sm-6'>" + 
+                    "<h1><span class='badge badge-danger' id='wrong'>0</span></h1></div></div>" +
+                    "<h1><span class='badge badge-success' id='percent'>33%</span></h1></div></div><br>" +
+                    "<button type=button class='btn btn-primary' id='start-button'>Play Again!</button>",
+    
     startGame: function () {
         this.questionNum = 0;
+        this.numCorrect = 0;
+        this.numWrong = 0;
         this.nextQuestion();
     },
 
@@ -85,8 +86,9 @@ var triviaGame = {
         var questionObj = questions[num];
         $("#question").text(questionObj.question);
 
-        // Create an array of all possible answers (both right and wrong answers).
-        var possibleChoices = questionObj.wrongAnswers;
+        // Create an array of all possible answers (both right answer and wrong answers).
+        var possibleChoices = [];
+        questionObj.wrongAnswers.forEach(function(wrongAnswer) { possibleChoices.push(wrongAnswer) });
         possibleChoices.push(questionObj.answer);
 
         // Shuffle these options.
@@ -149,9 +151,11 @@ var triviaGame = {
         
         // Evaluate the game.
         if (userChoice === questions[this.questionNum].answer) {
+            $("#correct").text(++this.numCorrect);
             modalTitle.text("Correct!");
             modalBody.text("Add some awesome celebration here");
         } else {
+            $("#wrong").text(++this.numWrong);
             userChoice === "" ? modalTitle.text("Time ran out!") : modalTitle.text("Wrong!");
             modalBody.text("The correct answer is: " + questions[this.questionNum].answer);
         }
@@ -181,7 +185,8 @@ var triviaGame = {
     },
 
     endGame: function () {
-        
+        $("#triviaCanvas").addClass("d-none");
+        $("#top-display").html(this.gameOverHtml);
     },
 
     updateTimerPill: function(state) {
@@ -192,14 +197,14 @@ var triviaGame = {
     }
 }
 
-// Activate Bootstrap Tooltips
+// Activate Bootstrap Tooltips.
 $(function () {
     $('[data-toggle="tooltip"]').tooltip();
-})
+});
 
-// Start Button listener
-$("#start-button").click(function () {
-
+// Start Button listener. Uses a "delegate event" as appose to a 
+// "direct event" handler to support dynamically added buttons with the specified id.
+$(document).on('click', "button#start-button", function(){
     // Update top display HTML.
     $("#top-display").html(triviaGame.timerHtml);
 
@@ -207,19 +212,19 @@ $("#start-button").click(function () {
     triviaGame.startGame();
 
     // Show question hidden UI elements.
-    $(".d-none").removeClass("d-none");
-})
+    $("#triviaCanvas").removeClass("d-none");
+});
 
 // Update list item everytime the player picks a choice
 $(".choice").click(function () {
     $(".choice").removeClass("active")
     $(this).addClass("active");
-})
+});
 
 // Event listener for the Submit button.
 $("#submit").click(function () {
     triviaGame.evaluateResult();
-})
+});
 
 // Listens for the modal to be closed to start the next question.
 $("#resultModal").on('hidden.bs.modal', function () {
@@ -229,7 +234,7 @@ $("#resultModal").on('hidden.bs.modal', function () {
 
     // Start playing the next question!
     triviaGame.nextQuestion();
-})
+});
 
 function shuffle(array) {
     // Shuffles an array using the Fisher-Yates Algorithm.

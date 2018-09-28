@@ -18,33 +18,35 @@
             <img src="assets/images/pixar-logo.jpg" alt="Pixar Logo" style="width: 100%">
             <p class="text-right" id="trivia-header">Trivia Game</p>
         </div>
-
+        
         <div id="top-display" class="text-center">
             <br>
             <button type="button" class="btn btn-primary" id="start-button">Start</button>
         </div>
 
-        <div class="d-none" id="center-display">
-            <div class="list-group text-center">
-                <button class="list-group-item list-group-item-action list-group-item-primary choice">Testing 1</button>
-                <br>
-                <button class="list-group-item list-group-item-action list-group-item-success choice">Testing 2</button>
-                <br>
-                <button class="list-group-item list-group-item-action list-group-item-warning choice">Testing 3</button>
-                <br>
-                <button class="list-group-item list-group-item-action list-group-item-info choice">Testing 4</button>
-            </div>
-        </div>
-        <br>
-        <div class="d-none" id="bottom-display">
-            <div class="progress">
-                <div id="progress" class="progress-bar bg-success" role="progressbar" style="width: 25%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" 
-                data-toggle="tooltip" data-placement="right" title="2/25"></div>
+        <div class="d-none" id="triviaCanvas" data-state="show">
+            <div id="center-display">
+                <div class="list-group text-center">
+                    <button class="list-group-item list-group-item-action list-group-item-primary choice">Testing 1</button>
+                    <br>
+                    <button class="list-group-item list-group-item-action list-group-item-success choice">Testing 2</button>
+                    <br>
+                    <button class="list-group-item list-group-item-action list-group-item-warning choice">Testing 3</button>
+                    <br>
+                    <button class="list-group-item list-group-item-action list-group-item-info choice">Testing 4</button>
+                </div>
             </div>
             <br>
-            <div class="text-right">
-                <button type="button" class="btn btn-primary" data-toggle="tooltip" data-placement="bottom"
-                    title="Are you positive?" id="submit">Submit</button>
+            <div id="bottom-display">
+                <div class="progress">
+                    <div id="progress" class="progress-bar bg-info" role="progressbar" style="width: 25%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" 
+                    data-toggle="tooltip" data-placement="right" title="2/25"></div>
+                </div>
+                <br>
+                <div class="text-right">
+                    <button type="button" class="btn btn-primary" data-toggle="tooltip" data-placement="bottom"
+                        title="Are you positive?" id="submit">Submit</button>
+                </div>
             </div>
         </div>
 
