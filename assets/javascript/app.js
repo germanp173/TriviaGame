@@ -124,7 +124,7 @@ var triviaGame = {
         if (userChoice === questions[this.questionNum].answer) {
             $("#correct").text(++this.numCorrect);
             modalTitle.html("<img src='assets/images/correct.png' alt='Check Mark' style='width:35px; height:35px'></img> Correct!");
-            modalBody.html("<img class='text-center' src='assets/images/pixar-celebration.jpg' alt='Celebration' style='width:450px;height:250px'>");
+            modalBody.html("<img class='text-center' src='assets/images/pixar-celebration.jpg' alt='Celebration' style='width:350px;height:200px'>");
         } else {
             $("#wrong").text(++this.numWrong);
             // Evaluate whether the answer is wrong or time ran out to determine modal title.
