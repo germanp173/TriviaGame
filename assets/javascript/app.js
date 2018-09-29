@@ -1,40 +1,10 @@
-var questions = {
-    1: {
-        question: "What year was Pixar started?",
-        answer: "1999",
-        wrongAnswers: [
-            "1955",
-            "1944",
-            "2018"
-        ]
-    },
-    2: {
-        question: "What year did Steve Jobs go to Pixar?",
-        answer: "2001",
-        wrongAnswers: [
-            "1400",
-            "1988",
-            "2005"
-        ]
-    },
-    3: {
-        question: "How many Toy Story Movies have been released?",
-        answer: "3",
-        wrongAnswers: [
-            "1",
-            "5",
-            "4"
-        ]
-    }
-}
-
 var intervals = [];
 
 var triviaGame = {
     questionNum: 0,
-    questionTimeout: 30, // In seconds
+    questionTimeout: 25, // In seconds
     questionTimeLeft: 0,
-    nextQuestionTimeout: 10, // In seconds
+    nextQuestionTimeout: 5, // In seconds
     nextQuestionTimeLeft: 0,
     numCorrect: 0,
     numWrong: 0,
@@ -49,6 +19,7 @@ var triviaGame = {
                     "<button type=button class='btn btn-primary' id='start-button'>Play Again!</button>",
     
     startGame: function () {
+        // Ensure key game properties are reset.
         this.questionNum = 0;
         this.numCorrect = 0;
         this.numWrong = 0;
@@ -116,10 +87,10 @@ var triviaGame = {
             $("#timeLeft").text(triviaGame.questionTimeLeft);
 
             // Update pill as needed or end the question.            
-            if (triviaGame.questionTimeLeft === 20) {
+            if (triviaGame.questionTimeLeft === 15) {
                 triviaGame.updateTimerPill("warning");
             }
-            else if (triviaGame.questionTimeLeft === 10) {
+            else if (triviaGame.questionTimeLeft === 5) {
                 triviaGame.updateTimerPill("danger");
             } 
             else if (triviaGame.questionTimeLeft === 0) {
@@ -148,16 +119,18 @@ var triviaGame = {
         var modalTitle = $("#modalCenterTitle");
         var modalBody = $(".modal-body");
         var userChoice = $(".active").text();
-        
+
         // Evaluate the game.
         if (userChoice === questions[this.questionNum].answer) {
             $("#correct").text(++this.numCorrect);
-            modalTitle.text("Correct!");
-            modalBody.text("Add some awesome celebration here");
+            modalTitle.html("<img src='assets/images/correct.png' alt='Check Mark' style='width:35px; height:35px'></img> Correct!");
+            modalBody.html("<img class='text-center' src='assets/images/pixar-celebration.jpg' alt='Celebration' style='width:450px;height:250px'>");
         } else {
             $("#wrong").text(++this.numWrong);
-            userChoice === "" ? modalTitle.text("Time ran out!") : modalTitle.text("Wrong!");
-            modalBody.text("The correct answer is: " + questions[this.questionNum].answer);
+            // Evaluate whether the answer is wrong or time ran out to determine modal title.
+            userChoice === "" ? modalTitle.html("<img src='assets/images/out-of-time.png' alt='Alarm' style='width:35px; height:35px'></img> Out of Time!") : modalTitle.html("<img src='assets/images/wrong.png' alt='X' style='width:35px; height:35px'></img> Wrong!");
+            modalBody.html("<p>The correct answer was:</p>");
+            modalBody.append("<h3>" + questions[this.questionNum].answer + "</h3>");
         }
         
         // Show results.
@@ -185,11 +158,16 @@ var triviaGame = {
     },
 
     endGame: function () {
+        // Set HTML final results page.
         $("#triviaCanvas").addClass("d-none");
         $("#top-display").html(this.gameOverHtml);
+        $("#correct").text(this.numCorrect);
+        $("#wrong").text(this.numWrong);
+        $("#percent").text(Math.round((this.numCorrect/Object.keys(questions).length)*100) + "%");
     },
 
     updateTimerPill: function(state) {
+        // Update the pill state to cause a change in badge color.
         var pill = $("#timeLeft");
         pill.removeClass("badge-" + pill.attr("data-state"));
         pill.addClass("badge-" + state);
